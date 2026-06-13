@@ -7,6 +7,7 @@ import {
   createProceduralEarthTexture,
   createProceduralNightTexture,
   createProceduralSpecularTexture,
+  createProceduralCloudTexture,
 } from "./textures"
 
 const vertexShader = `
@@ -26,6 +27,7 @@ const fragmentShader = `
 uniform sampler2D dayTexture;
 uniform sampler2D nightTexture;
 uniform sampler2D specularTexture;
+uniform sampler2D cloudShadowTexture;
 uniform vec3 sunDirection;
 
 varying vec2 vUv;
@@ -41,6 +43,12 @@ void main() {
   vec3 dayColor = texture2D(dayTexture, vUv).rgb;
   vec3 nightColor = texture2D(nightTexture, vUv).rgb;
   float specularMap = texture2D(specularTexture, vUv).r;
+
+  // Cloud shadow projected onto Earth surface
+  // Offset UV slightly in the sun direction to simulate shadow projection
+  vec2 shadowOffset = vec2(sunDir.x, sunDir.y) * 0.012;
+  float cloudShadow = texture2D(cloudShadowTexture, vUv + shadowOffset).r;
+  float shadowFactor = 1.0 - cloudShadow * 0.35 * step(0.0, NdotL);
 
   float dayMix = clamp(NdotL * 1.2 + 0.1, 0.0, 1.0);
 
@@ -84,6 +92,7 @@ export function Earth({ sunDirection }: EarthProps) {
     dayTexture: { value: makeDefaultTexture() as THREE.Texture },
     nightTexture: { value: makeDefaultTexture() as THREE.Texture },
     specularTexture: { value: makeDefaultTexture() as THREE.Texture },
+    cloudShadowTexture: { value: makeDefaultTexture() as THREE.Texture },
     sunDirection: { value: sunDirection.clone() },
   })
 
@@ -91,9 +100,11 @@ export function Earth({ sunDirection }: EarthProps) {
     const day = new THREE.CanvasTexture(createProceduralEarthTexture())
     const night = new THREE.CanvasTexture(createProceduralNightTexture())
     const spec = new THREE.CanvasTexture(createProceduralSpecularTexture())
+    const cloud = new THREE.CanvasTexture(createProceduralCloudTexture())
     uniformsRef.current.dayTexture.value = day
     uniformsRef.current.nightTexture.value = night
     uniformsRef.current.specularTexture.value = spec
+    uniformsRef.current.cloudShadowTexture.value = cloud
     // sunDirection is constant — set once
     uniformsRef.current.sunDirection.value.copy(sunDirection)
   }, [sunDirection])
