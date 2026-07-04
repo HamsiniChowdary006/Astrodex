@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useCallback, useMemo } from "react"
+import { useRef, useCallback, useEffect, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Stars } from "@react-three/drei"
 import * as THREE from "three"
@@ -13,19 +13,24 @@ import { SatelliteSystem } from "./SatelliteSystem"
 import { CameraController } from "./CameraController"
 import { Effects } from "./Effects"
 import { useAppState } from "@/lib/store"
+import type { AsteroidData } from "@/lib/types"
 
 function SceneContent() {
   const sunDirection = useMemo(() => new THREE.Vector3(5, 3, 5).normalize(), [])
-  const { selectAsteroid } = useAppState()
+  const { selectedAsteroid, selectAsteroid } = useAppState()
   const selectedIndexRef = useRef<number | null>(null)
 
   const handleAsteroidClick = useCallback(
-    (data: any) => {
+    (data: AsteroidData) => {
       selectedIndexRef.current = data.index
       selectAsteroid(data)
     },
     [selectAsteroid]
   )
+
+  useEffect(() => {
+    selectedIndexRef.current = selectedAsteroid?.index ?? null
+  }, [selectedAsteroid])
 
   const getSelectedIndex = useCallback(() => selectedIndexRef.current, [])
 
