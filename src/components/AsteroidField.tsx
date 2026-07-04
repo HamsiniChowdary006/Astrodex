@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useMemo, useCallback, useEffect } from "react"
-import { useFrame } from "@react-three/fiber"
+import { useFrame, type ThreeEvent } from "@react-three/fiber"
 import * as THREE from "three"
 import type { AsteroidData } from "@/lib/types"
 import { useAppState } from "@/lib/store"
@@ -57,6 +57,16 @@ function generateOrbitalObjectData(index: number): AsteroidData {
 
 const dummy = new THREE.Object3D()
 const colorObj = new THREE.Color()
+const ASTEROID_MESH_ARGS: [THREE.BufferGeometry | undefined, THREE.Material | undefined, number] = [
+  undefined,
+  undefined,
+  ASTEROID_COUNT,
+]
+const DEBRIS_MESH_ARGS: [THREE.BufferGeometry | undefined, THREE.Material | undefined, number] = [
+  undefined,
+  undefined,
+  DEBRIS_COUNT,
+]
 
 // Shared ref for camera tracking — only the selected object's position
 export const trackedPosition = { current: new THREE.Vector3() }
@@ -255,7 +265,7 @@ export function AsteroidField({ onAsteroidClick, getSelectedIndex }: AsteroidFie
   })
 
   const handleAsteroidClick = useCallback(
-    (e: any) => {
+    (e: ThreeEvent<MouseEvent>) => {
       if (e.instanceId === undefined) return
       onAsteroidClick(dataRef.current[e.instanceId])
     },
@@ -263,7 +273,7 @@ export function AsteroidField({ onAsteroidClick, getSelectedIndex }: AsteroidFie
   )
 
   const handleDebrisClick = useCallback(
-    (e: any) => {
+    (e: ThreeEvent<MouseEvent>) => {
       if (e.instanceId === undefined) return
       onAsteroidClick(dataRef.current[ASTEROID_COUNT + e.instanceId])
     },
@@ -275,7 +285,7 @@ export function AsteroidField({ onAsteroidClick, getSelectedIndex }: AsteroidFie
       {/* ─── Asteroids Field (Rocky) ─── */}
       <instancedMesh
         ref={asteroidMeshRef}
-        args={[null as any, null as any, ASTEROID_COUNT]}
+        args={ASTEROID_MESH_ARGS}
         onClick={handleAsteroidClick}
         frustumCulled={false}
       >
@@ -286,7 +296,7 @@ export function AsteroidField({ onAsteroidClick, getSelectedIndex }: AsteroidFie
       {/* ─── Space Debris Field (Spent parts, fragments) ─── */}
       <instancedMesh
         ref={debrisMeshRef}
-        args={[null as any, null as any, DEBRIS_COUNT]}
+        args={DEBRIS_MESH_ARGS}
         onClick={handleDebrisClick}
         frustumCulled={false}
       >
