@@ -3,6 +3,11 @@
 import { useState, useEffect, useRef } from "react"
 import { useAppState } from "@/lib/store"
 
+type LogEntry = {
+  time: string
+  msg: string
+}
+
   const LOG_MESSAGES = [
     "[SYS] Orbital propagator initialized — 600 objects tracked",
     "[CONJ] Scanning primary object catalog for close approaches...",
@@ -43,7 +48,7 @@ function createInitialLogs() {
 
 export function AgentTerminal() {
   const { terminalExpanded, toggleTerminal, boostCount, deltaVCount } = useAppState()
-  const [logs, setLogs] = useState(createInitialLogs)
+  const [logs, setLogs] = useState<LogEntry[]>(createInitialLogs)
   const scrollRef = useRef<HTMLDivElement>(null)
   const indexRef = useRef(3)
   const lastBoostSeen = useRef(boostCount)
@@ -117,6 +122,9 @@ export function AgentTerminal() {
       {/* Toggle bar */}
       <button
         onClick={toggleTerminal}
+        aria-controls="agent-terminal-log"
+        aria-expanded={terminalExpanded}
+        aria-label={terminalExpanded ? "Collapse agent terminal notifications" : "Expand agent terminal notifications"}
         style={{
           display: "flex",
           alignItems: "center",
@@ -167,7 +175,12 @@ export function AgentTerminal() {
       {/* Terminal content */}
       {terminalExpanded && (
         <div
+          id="agent-terminal-log"
           ref={scrollRef}
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions text"
+          aria-label="Agent terminal notifications"
           style={{
             flex: 1,
             overflowY: "auto",
