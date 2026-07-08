@@ -7,9 +7,11 @@ import { LeftSidebar } from "@/components/LeftSidebar"
 import { RightSidebar } from "@/components/RightSidebar"
 import { AgentTerminal } from "@/components/AgentTerminal"
 import { AsteroidCard } from "@/components/AsteroidCard"
+import { LoadingSkeleton } from "@/components/LoadingSkeleton"
 
 const Scene = dynamic(() => import("@/components/Scene").then((m) => ({ default: m.Scene })), {
   ssr: false,
+  loading: () => <LoadingSkeleton />,
 })
 
 export default function Home() {
