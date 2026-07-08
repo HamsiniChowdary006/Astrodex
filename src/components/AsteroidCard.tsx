@@ -1,6 +1,7 @@
 "use client"
 
 import { useAppState } from "@/lib/store"
+import { useEffect } from "react"
 
 export function AsteroidCard() {
   const {
@@ -10,6 +11,14 @@ export function AsteroidCard() {
     leftSidebarOpen,
     selectAsteroid,
   } = useAppState()
+  useEffect(() => {
+  if (!selectedAsteroid) return
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") selectAsteroid(null)
+  }
+  document.addEventListener("keydown", onKeyDown)
+  return () => document.removeEventListener("keydown", onKeyDown)
+}, [selectedAsteroid, selectAsteroid])
 
   if (!selectedAsteroid) return null
 
@@ -67,6 +76,7 @@ export function AsteroidCard() {
         <button
           className="btn-ghost"
           onClick={() => selectAsteroid(null)}
+          aria-label="Close asteroid Card"
           style={{ padding: 4, border: "none" }}
         >
           <svg
